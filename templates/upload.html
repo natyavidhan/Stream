@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Upload{% endblock title %}
+{% block content %}
+      <h1 class="text-center mt-5">Make A Post</h1>
+      <div class="container mt-5">
+        <form  method = "POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="formFileMultiple" class="form-label">Add Files For Uploading</label>
+            <input class="form-control" type="file" id="formFileMultiple" name="files"  accept=".png, .jpg, .mp4" autocomplete="off" required>
+          </div>
+          <br>
+          <h4>Text</h4>
+          <div class="input-group">
+            <textarea class="form-control" aria-label="With textarea" name="text" required></textarea>
+          </div>
+          <br>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    
+{% endblock %}

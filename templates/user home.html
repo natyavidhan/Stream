@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block content %}
+      <div class="mt-5 images container">
+        {% for image in images %}
+        <div class="row">
+          <div class="card col mt-3" style="width: 18rem;">
+            <img src="{{image['link']}}" class="card-img-top" alt="...">
+            <div class="card-body">
+              <p class="card-text">{{image['text']}}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+{% endblock %}
