@@ -1,0 +1,29 @@
+.profile{
+    display: flex;
+    justify-content: center;
+}
+.profile .pfp{
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    border-color: black;
+    border-width: 10;
+
+}
+.changepfp{
+    height: 30px;
+    width: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-style: solid;
+    border-radius: 5%;
+    border-color: black;
+    border-width: 10;
+    background-color: rgb(228, 228, 228);
+}
+.grid{
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(autofit, 350px) ;
+}
