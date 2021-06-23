@@ -1,0 +1,61 @@
+<style>
+    .container {
+      background: dodgerblue;
+      padding: 20px;
+      height: 70px;
+    }
+    
+    #hamburger {
+      width: 40px;
+      height: 40px;
+      display: block;
+      position: relative;
+      float: right;
+      transform: rotate(0deg);
+      transition: .5s ease-in-out;
+      cursor: pointer;
+    }
+    #hamburger span {
+      display: block;
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: white;
+      border-radius: 9px;
+      opacity: 1;
+      left: 0;
+      transform: rotate(0deg);
+      transition: .25s ease-in-out;
+    }
+    #hamburger span:nth-child(1) {
+      top: 0px;
+    }
+    #hamburger span:nth-child(2) {
+      top: 12px;
+    }
+    #hamburger span:nth-child(3) {
+      top: 24px;
+    }
+    #hamburger.open span:nth-child(1) {
+      top: 14px;
+      transform: rotate(135deg);
+    }
+    #hamburger.open span:nth-child(2) {
+      opacity: 0;
+      left: -60px;
+    }
+    #hamburger.open span:nth-child(3) {
+      top: 14px;
+      transform: rotate(-135deg);
+    }
+    
+    </style>
+    <body>
+      <div class="container">
+           <div id="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+          </div> 
+      </div>
+    </body>

@@ -1,5 +1,6 @@
 /* The navigation bar */
 .navigationbar {
+    z-index: 10;
     overflow: hidden;
     background-color: #333;
     position: fixed; /* Set the navbar to fixed position */

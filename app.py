@@ -5,6 +5,7 @@ import uuid
 import json
 from pymongo import MongoClient
 import datetime
+import os
 #-----------------------------------private stuff--------------------------
 with open("cred.json", "r") as f:
     credentials = json.load(f)
@@ -31,10 +32,18 @@ def home():
         userposts = posts[session['user'][0]]
         img = userposts.find({})
         data = []
+        total = 0
         for image in img:
-            data.append({"link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
+            total+=1
+            data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
         # print(data)
-        return render_template('user home.html', images = data, user = session['user'][0])
+        try:
+            pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)
+        except:
+            image = os.path.join(os.path.dirname(__file__), "static\\user.png")
+            storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image) 
+            pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)  
+        return render_template('user home.html', images = data, user = session['user'][0], total=total, pic=pfp)
     else:
         return render_template('home.html')
 
@@ -85,7 +94,9 @@ def signup_func():
                 usercollection = socialapp[name]
                 usercollection.insert_one(data)
                 accounts.insert_one(data)
-                session['user'] = [name, email, password]          
+                session['user'] = [name, email, password]
+                image = os.path.join(os.path.dirname(__file__), "static\\user.png")
+                storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image)          
                 return redirect('/')
             else:
                 return "Username Already Exist!"
@@ -127,27 +138,47 @@ def upload_func():
     collection.insert_one(data)
     return redirect('/')
 
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'GET':
+        return render_template('settings.html')
+    else:
+        file = request.files['image']
+        storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(file)
+        return redirect("/")
+    
 @app.route('/logout')
 def logout():
     session.pop('user')
     return redirect('/')
 
+
 @app.route('/user/<string:name>')
 def users(name):
-    usernames = db.child("users").get()
-    if name in usernames.val():
-        img = db.child("users").child(name).child('media').get()
-        data = []
-        if img.val() == None:
-            return render_template('user home.html', images = data)
+    nameifany = accounts.find_one({"username":name})
+    if nameifany != None:
+        if 'user' in session:
+            if name == session['user'][0]:
+                return redirect('/')
+            else:
+                # img = db.order_by_child("users").equal_to(session['user'][0]).get()
+                # img = db.child("users").child(session['user'][0]).child('media').get()
+                userposts = posts[name]
+                img = userposts.find({})
+                data = []
+                total = 0
+                for image in img:
+                    total+=1
+                    data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
+                # print(data)
+                pfp = storage.child(f"users/{name}/Info/ProfilePic.png").get_url(None)  
+                return render_template('profiles.html', images = data, user = name, total=total, pic=pfp)
         else:
-            for image in img.val():
-                mages = db.child("users").child(name).child('media').child(image).get().val()
-                data.append({"link": mages['url'], "text": mages['text']})
-                print(f"image link: {mages['url']} \nText: {mages['text']}")
-                
+            return redirect('/login')
     else:
         return f"{name} account doesn't exist!"
     # return "e"
+    
 if __name__ == '__main__':
     app.run('localhost', 8080, True)

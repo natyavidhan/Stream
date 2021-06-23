@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock title %}
+{% block content %}
+<head>
+  <link rel="stylesheet" href="/static/css/userhome.css">
+</head>
+<div class="container">
+	<h1 class="text-center">
+		Settings
+	</h1>
+	<form method = "POST" enctype="multipart/form-data">
+		<div class="mb-3">
+			<label for="formFileSm" class="form-label">Select Display Picture For Profile</label>
+			<input class="form-control form-control-sm" id="formFileSm" name="image" type="file" accept=".png, .jpg" required>
+			<div class="profile mt-3">
+			<button type="submit" class="btn btn-primary btn-sm">Upload</button>
+			</div>
+		  </div>
+	</form>
+	
+</div>
+
+{% endblock %}

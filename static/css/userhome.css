@@ -27,3 +27,7 @@
     gap: 1rem;
     grid-template-columns: repeat(autofit, 350px) ;
 }
+
+.shadowblock{
+    filter: drop-shadow(7px 7px 7px black);
+}
