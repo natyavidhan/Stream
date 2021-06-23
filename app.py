@@ -6,7 +6,9 @@ import json
 from pymongo import MongoClient
 import datetime
 import os
+
 #-----------------------------------private stuff--------------------------
+
 with open("cred.json", "r") as f:
     credentials = json.load(f)
     
@@ -47,8 +49,6 @@ def home():
     else:
         return render_template('home.html')
 
-
-
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -66,7 +66,6 @@ def login_func():
         return redirect('/')
     except:
         return "Wrong Email or/and Password!"
-    
     
 @app.route('/signup')
 def signup():
@@ -138,7 +137,6 @@ def upload_func():
     collection.insert_one(data)
     return redirect('/')
 
-
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
@@ -152,7 +150,6 @@ def settings():
 def logout():
     session.pop('user')
     return redirect('/')
-
 
 @app.route('/user/<string:name>')
 def users(name):
