@@ -29,8 +29,6 @@ app.config['SECRET_KEY'] = credentials['sessionkey']
 @app.route('/')
 def home():
     if 'user' in session:
-        # img = db.order_by_child("users").equal_to(session['user'][0]).get()
-        # img = db.child("users").child(session['user'][0]).child('media').get()
         userposts = posts[session['user'][0]]
         img = userposts.find({})
         data = []
@@ -59,7 +57,7 @@ def login_func():
     password = request.form['password']
     try:
         user = auth.sign_in_with_email_and_password(email, password)
-        # print(user)
+        print(user)
         name = accounts.find_one({"email":email})
         username = name['username']
         session['user'] = [username, email, password]
@@ -78,33 +76,34 @@ def signup_func():
     password = request.form['password']
     conpassword = request.form['confirmpassword']
     
-    # try:
-    if password == conpassword:
-        detailsifany = accounts.find_one({"email":email})
-        if detailsifany == None:
-            nameifany = accounts.find_one({"username":name})
-            if nameifany == None:
-                user = auth.create_user_with_email_and_password(email, password)
-                data = {
-                    "username": name,
-                    "email": email,
-                    "password": password
-                }
-                usercollection = socialapp[name]
-                usercollection.insert_one(data)
-                accounts.insert_one(data)
-                session['user'] = [name, email, password]
-                image = os.path.join(os.path.dirname(__file__), "static\\user.png")
-                storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image)          
-                return redirect('/')
+    try:
+        if password == conpassword:
+            detailsifany = accounts.find_one({"email":email})
+            if detailsifany == None:
+                nameifany = accounts.find_one({"username":name})
+                if nameifany == None:
+                    user = auth.create_user_with_email_and_password(email, password)
+                    print(user)
+                    data = {
+                        "username": name,
+                        "email": email,
+                        "password": password
+                    }
+                    usercollection = socialapp[name]
+                    usercollection.insert_one(data)
+                    accounts.insert_one(data)
+                    session['user'] = [name, email, password]
+                    image = os.path.join(os.path.dirname(__file__), "static\\user.png")
+                    storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image)          
+                    return redirect('/')
+                else:
+                    return "Username Already Exist!"
             else:
-                return "Username Already Exist!"
+                return "Email Already Exist!"
         else:
-            return "Email Already Exist!"
-    else:
-        return "passwords doesn't match!"
-    # except:
-    #     return "Error (weak password)"
+            return "passwords doesn't match!"
+    except:
+        return "Error (weak password)"
 
 @app.route('/upload')
 def upload():
@@ -159,8 +158,6 @@ def users(name):
             if name == session['user'][0]:
                 return redirect('/')
             else:
-                # img = db.order_by_child("users").equal_to(session['user'][0]).get()
-                # img = db.child("users").child(session['user'][0]).child('media').get()
                 userposts = posts[name]
                 img = userposts.find({})
                 data = []
