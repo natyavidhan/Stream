@@ -17,6 +17,7 @@ db = MongoClient(credentials['mongo'])
 socialapp = db['Users']
 accounts = socialapp['users']
 posts = db['Posts']
+RAdb = db['RAdb']
 firebase = pyrebase.initialize_app(creds)
 db = firebase.database()
 auth = firebase.auth()
@@ -25,7 +26,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = credentials['sessionkey']
 
 #----------------------------------------------------------------------------
-
+# @app.route('/')
+# def index():
+#     return render_template('browse.html')
 @app.route('/')
 def home():
     if 'user' in session:
@@ -61,7 +64,7 @@ def login_func():
         name = accounts.find_one({"email":email})
         username = name['username']
         session['user'] = [username, email, password]
-        return redirect('/')
+        return redirect('/profile')
     except:
         return "Wrong Email or/and Password!"
     
@@ -95,7 +98,7 @@ def signup_func():
                     session['user'] = [name, email, password]
                     image = os.path.join(os.path.dirname(__file__), "static\\user.png")
                     storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image)          
-                    return redirect('/')
+                    return redirect('/profile')
                 else:
                     return "Username Already Exist!"
             else:
@@ -124,6 +127,7 @@ def upload_func():
     url = storage.child(f"users/{session['user'][0]}/media").child(f"{filename}.{ext[1]}").get_url(None)
     data = {
         '_id': filename,
+        'by' : session['user'][0],
         'url': url, 
         'text': text, 
         'tags': taglist,
@@ -134,7 +138,16 @@ def upload_func():
         }
     collection = posts[session['user'][0]]
     collection.insert_one(data)
-    return redirect('/')
+    RAdb['posts'].insert_one(data)
+    for tag in taglist:
+        TagExist = RAdb['tags'].find_one({'_id': tag})
+        if not TagExist:
+            RAdb['tags'].insert_one({'_id': tag, 'posts': [filename]})
+        else:
+            tagposts = TagExist['posts']
+            tagposts.append(filename)
+            RAdb['tags'].update_one({'_id': tag}, {'$set':{'posts': tagposts}})
+    return redirect('/profile')
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -143,7 +156,7 @@ def settings():
     else:
         file = request.files['image']
         storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(file)
-        return redirect("/")
+        return redirect("/profile")
     
 @app.route('/logout')
 def logout():
