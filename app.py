@@ -26,10 +26,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = credentials['sessionkey']
 
 #----------------------------------------------------------------------------
-# @app.route('/')
-# def index():
-#     return render_template('browse.html')
 @app.route('/')
+def index():
+    posts = RAdb['posts'].find({})
+    if 'user' in session:
+        return render_template('browse.html', posts=posts)
+    else:
+        return render_template('browse no user.html', posts=posts)        
+@app.route('/profile')
 def home():
     if 'user' in session:
         userposts = posts[session['user'][0]]
@@ -169,7 +173,7 @@ def users(name):
     if nameifany != None:
         if 'user' in session:
             if name == session['user'][0]:
-                return redirect('/')
+                return redirect('/profile')
             else:
                 userposts = posts[name]
                 img = userposts.find({})
