@@ -1,0 +1,85 @@
+{% extends 'base.html' %} {% block title %}Home{% endblock title %} {% block
+    content %}
+    
+  <link rel="stylesheet" href="/static/css/userhome.css" />
+    <style>
+        .profile{
+    height: 175px;
+    width: 175px;
+    border-radius: 50%;
+    border-color: black;
+    border-width: 10;
+    display: flex;
+    justify-content: center;
+}
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+social .border { width: 450px; padding: 40px 10px 45px 10px; border: 1px solid #eee }
+social .avatar { width: 100px; height: 100px; padding: 10px; background-color: #fff; border: solid #eee 1px; border-radius: 100px; margin-top: 5px }
+social .avatar1 { width: 100px; height: 100px; border-radius: 100px }
+social .blob p { margin-bottom: -2px; min-width: 5px; max-width: 230px; width: auto; padding: 10px; border-radius: 100px; background-color: #FDFDFD; line-height: 100%; display: block; text-align: justify; float: right; clear: right; position: relative; font-family: roboto; color: #555; font-size: 9px; margin-right: 10px; margin-left: 10px; text-transform: uppercase; border: 1px solid #eee }
+social .blobback { width: 140px }
+social .blob2 p { margin-bottom: -2px; min-width: 5px; max-width: 230px; width: auto; padding: 10px; border-radius: 100px; background-color: #FDFDFD; line-height: 100%; display: block; text-align: justify; float: left; clear: left; position: relative; font-family: roboto; color: #555; font-size: 9px; margin-left: 10px; text-transform: uppercase; border: 1px solid #eee }
+social .blob b { color: #1a1a1a }
+.button1 { font-family: roboto; font-size: 15px; text-align: center; background-color: #000; padding: 3px 0px 4px 0px; border: 1px solid #eee; border-radius: 15px; text-transform: uppercase; display: block; width: 310px; color: #FFF; text-decoration: none; margin-bottom: 20px; margin-top: 10px }
+social .bigimage { width: 340px; height: 340px; padding: 15px; background-color: #fff; border: 1px solid #eee; margin-top: 20px; margin-bottom: -10px }
+social .bigimage2 { width: 340px; height: 340px; background-size: cover }
+social .tags { padding: 5px 10px 6px 10px; background-color: #fff; font-family: roboto; font-size: 8px; border-radius: 100px; text-align: center; border: 1px solid #eee; text-transform: uppercase }
+
+social .jupiter .button1 { background-color: #4F0946 }
+social .mars .button1 { background-color: #7D0013 }
+social .mercury .button1 { background-color: #745D17 }
+social .neptune .button1 { background-color: #134F3C }
+social .pluto .button1 { background-color: #536F9E }
+social .saturn .button1 { background-color: #382A1C }
+social .uranus .button1 { background-color: #2A3846 }
+social .venus .button1 { background-color: #B91782 }
+  a, a:hover, a:focus, a:active {
+      text-decoration: none;
+      color: inherit;
+ }
+    </style>
+    <center class="container">
+        <a href="/user/{{data['by']}}">
+            <img src="{{pic}}" class="profile" alt="">
+        </a>
+        <a href="/user/{{data['by']}}">
+            <div class="button1">POSTED BY {{data['by']}}</div>
+        </a>
+        <div class="card mb-3">
+            <img src="{{data['url']}}" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">{{data['text']}}</h5>
+              <p class="card-text">Likes: 0</p>
+              <p class="card-text"><small class="text-muted">{{data['date']}} {{data['time']}}</small></p>
+            </div>
+          </div>
+          <h2 class="mt-5">Comments:</h2>
+          <div class="input-group mb-3">
+            <input class="form-control" type="text" id="comment" placeholder="Comment" aria-label="default input example">
+            <button type="button" class="btn btn-outline-dark" onclick="comment();">Comment</button>
+          </div>
+          {% for comment in data['comments'] %}
+            <div class="card mt-4">
+                <div class="card-body">
+                    <b>
+                        <a href="/user/{{comment['by']}}">{{comment['by']}}</a><br></b>
+                {{comment['text']}}
+                </div>
+            </div>
+          {% endfor %}
+    </center>
+    <script>
+        function comment(){
+            var text = document.getElementById("comment").value;
+            if (text!=""){
+                var code = new XMLHttpRequest();
+                code.open( "GET", `/comment/{{data['_id']}}/?text=${text}`, false );
+                code.send( null );
+                var response = code.responseText;
+                window.location.reload();
+                // document.getElementById("result").textContent=response;
+            }
+        }
+    </script>
+    {% endblock %}

@@ -133,7 +133,7 @@ def upload_func():
         'tags': taglist,
         'date': now.strftime("%Y-%m-%d"),
         'time': now.strftime("%H:%M:%S"),
-        'comments': {},
+        'comments': [],
         'likes': []
         }
     collection = posts[session['user'][0]]
@@ -186,6 +186,32 @@ def users(name):
     else:
         return f"{name} account doesn't exist!"
     # return "e"
+@app.route('/post/<string:postID>')
+def post(postID):
+    # try:
+    pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None) 
     
+    return render_template('post.html', data=RAdb['posts'].find_one({'_id': postID}), pic=pfp)
+    # except:
+    #     return "Post With this ID doesn't exist!"
+@app.route('/comment/<string:ID>/')
+def comemnt(ID):
+    if 'user' in session:
+        text = request.args.get('text')
+        data = {'by': session['user'][0], 'text': text}
+        try:
+            comments = RAdb['posts'].find_one({'_id': ID})
+            if comments is not None:
+                comments = comments['comments']
+                comments.append(data)
+                RAdb['posts'].update({'_id': ID}, {'$set': {'comments': comments}})
+                return "Commented!"
+            else:
+                return "that ID doesn't exist!"
+        except:
+            return "Failed!"
+    else:
+        return redirect('/login')
+                
 if __name__ == '__main__':
-    app.run('localhost', 8080, True)
+    app.run(port=8080, debug=True)
