@@ -44,7 +44,7 @@ social .venus .button1 { background-color: #B91782 }
             <img src="{{pic}}" class="profile" alt="">
         </a>
         <a href="/user/{{data['by']}}">
-            <div class="button1">POSTED BY {{data['by']}}</div>
+            <div class="button1">POSTED BY {{data['name']}}</div>
         </a>
         <div class="card mb-3">
             <img src="{{data['url']}}" class="card-img-top" alt="...">
@@ -63,7 +63,7 @@ social .venus .button1 { background-color: #B91782 }
             <div class="card mt-4">
                 <div class="card-body">
                     <b>
-                        <a href="/user/{{comment['by']}}">{{comment['by']}}</a><br></b>
+                        <a href="/user/{{comment['id']}}">{{comment['by']}}</a><br></b>
                 {{comment['text']}}
                 </div>
             </div>
