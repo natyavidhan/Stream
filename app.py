@@ -219,3 +219,14 @@ def comemnt(ID):
                 
 if __name__ == '__main__':
     app.run(port=8080, debug=True)
+#fizz buzz for fun
+for int i in 100:
+    else if i % 5 == 0:
+        print("fizz")
+    else if i % 3 == 0:
+        print("buzz")
+    else if i % 3 == 0 && i % 5 == 0:
+        print("fizzbuzz")
+    else:
+        print(str(i))
+        
