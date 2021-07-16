@@ -211,11 +211,18 @@ def users(name):
 @app.route('/post/<string:postID>')
 def post(postID):
     # try:
-    post = RAdb['posts'].find_one({'_id': postID})
-    user = post['by']
-    pfp = storage.child(f"users/{user}/Info/ProfilePic.png").get_url(None) 
-    
-    return render_template('post.html', data=post, pic=pfp)
+    if 'user' in session:
+        post = RAdb['posts'].find_one({'_id': postID})
+        user = post['by']
+        pfp = storage.child(f"users/{user}/Info/ProfilePic.png").get_url(None) 
+        
+        return render_template('post.html', data=post, pic=pfp)
+    else:
+        post = RAdb['posts'].find_one({'_id': postID})
+        user = post['by']
+        pfp = storage.child(f"users/{user}/Info/ProfilePic.png").get_url(None) 
+        
+        return render_template('post no user.html', data=post, pic=pfp)
     # except:
     #     return "Post With this ID doesn't exist!"
 @app.route('/comment/<string:ID>/')
@@ -237,6 +244,14 @@ def commemnt(ID):
             return "Failed!"
     else:
         return redirect('/login')
+    
+@app.route('/TOS')
+def tos():
+    return render_template('tos.html')
+
+@app.route('/privacy-policy')
+def privacypolicy():
+    return render_template('privacy-policy.html')
                 
 if __name__ == '__main__':
     app.run(debug=True)
