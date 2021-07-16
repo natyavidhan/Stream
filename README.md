@@ -8,7 +8,7 @@ We (me only because I have no friends and contributors :( ) only store your Gmai
 ## Modules used
 1. Flask
 2. Pyerbase
-3.Pymongo
+3. Pymongo
 
 ### My checklist
 - [x] Homepage
