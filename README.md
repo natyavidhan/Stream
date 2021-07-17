@@ -17,4 +17,4 @@ We (me only because I have no friends and contributors :( ) only store your Gmai
 - [x] Add Commenting
 - [x] change Profile Image
 - [ ] Add Liking
-- [ ] Sign In with google
+- [x] Sign In with google
