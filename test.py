@@ -14,11 +14,8 @@ tags = [
 total = 0
 for i, a in tags:
     total = total + a
-    
-pure = []
 
-for i, a in tags:
-    pure.append([i, round((a/total*100)*0.5)])
+pure = [[i, round((a/total*100)*0.5)] for i, a in tags]
 
 print(pure)
 total = 0

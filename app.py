@@ -36,10 +36,7 @@ flow = Flow.from_client_secrets_file(
 
 def login_is_required(function):
     def wrapper(*args, **kwargs):
-        if "google_id" not in session:
-            return abort(401)  # Authorization required
-        else:
-            return function()
+        return abort(401) if "google_id" not in session else function()
 
     return wrapper
 
@@ -71,23 +68,22 @@ def index():
         return render_template('browse no user.html', posts=posts)        
 @app.route('/profile')
 def home():
-    if 'user' in session:
-        img = RAdb['posts'].find({'by': session['user'][0]})#userposts.find({})
-        data = []
-        total = 0
-        for image in img:
-            total+=1
-            data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
-        # print(data)
-        try:
-            pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)
-        except:
-            image = os.path.join(os.path.dirname(__file__), "static\\user.png")
-            storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image) 
-            pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)  
-        return render_template('user home.html', images = data, user = session['user'][2], total=total, pic=pfp)
-    else:
+    if 'user' not in session:
         return render_template('home.html')
+    img = RAdb['posts'].find({'by': session['user'][0]})#userposts.find({})
+    data = []
+    total = 0
+    for image in img:
+        total+=1
+        data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
+    # print(data)
+    try:
+        pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)
+    except:
+        image = os.path.join(os.path.dirname(__file__), "static\\user.png")
+        storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image) 
+        pfp = storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").get_url(None)
+    return render_template('user home.html', images = data, user = session['user'][2], total=total, pic=pfp)
 
 @app.route("/login")
 def login():
@@ -99,7 +95,7 @@ def login():
 def callback():
     flow.fetch_token(authorization_response=request.url)
 
-    if not session["state"] == request.args["state"]:
+    if session["state"] != request.args["state"]:
         abort(500)  # State does not match!
 
     credentials = flow.credentials
@@ -118,15 +114,15 @@ def callback():
     ifExist = accounts.find_one({'email': email})
     if ifExist is not None:
         session['user'] = [ifExist['_id'], email, name]
-        return redirect('/profile')
     else:
         ID = str(uuid.uuid4())
         data = {'_id': ID, 'email': email, 'name': name}
         accounts.insert_one(data)
         session['user'] = [ID, email, name]
         image = os.path.join(os.path.dirname(__file__), "static\\user.png")
-        storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image) 
-        return redirect('/profile')
+        storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(image)
+
+    return redirect('/profile')
 
 
 @app.route('/upload')
@@ -136,7 +132,7 @@ def upload():
 @app.route('/upload', methods=['POST'])
 def upload_func():
     
-    now = datetime.datetime.now()   
+    now = datetime.datetime.now()
     filename = str(uuid.uuid4())
     file = request.files['files']
     text = request.form['text']
@@ -162,23 +158,21 @@ def upload_func():
     # collection.insert_one(data)
     RAdb['posts'].insert_one(data)
     for tag in taglist:
-        TagExist = RAdb['tags'].find_one({'_id': tag})
-        if not TagExist:
-            RAdb['tags'].insert_one({'_id': tag, 'posts': [filename]})
-        else:
+        if TagExist := RAdb['tags'].find_one({'_id': tag}):
             tagposts = TagExist['posts']
             tagposts.append(filename)
             RAdb['tags'].update_one({'_id': tag}, {'$set':{'posts': tagposts}})
+        else:
+            RAdb['tags'].insert_one({'_id': tag, 'posts': [filename]})
     return redirect('/profile')
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
         return render_template('settings.html')
-    else:
-        file = request.files['image']
-        storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(file)
-        return redirect("/profile")
+    file = request.files['image']
+    storage.child(f"users/{session['user'][0]}/Info/ProfilePic.png").put(file)
+    return redirect("/profile")
     
 @app.route('/logout')
 def logout():
@@ -188,25 +182,22 @@ def logout():
 @app.route('/user/<string:name>')
 def users(name):
     nameifany = accounts.find_one({"_id":name})
-    if nameifany != None:
-        if 'user' in session:
-            if name == session['user'][0]:
-                return redirect('/profile')
-            else:
-                img = RAdb['posts'].find({'by': name})
-                data = []
-                total = 0
-                for image in img:
-                    total+=1
-                    data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
-                # print(data)
-                pfp = storage.child(f"users/{name}/Info/ProfilePic.png").get_url(None)  
-                name = accounts.find_one({'_id': name})
-                return render_template('profiles.html', images = data, user = name['name'], total=total, pic=pfp)
-        else:
-            return redirect('/login')
-    else:
+    if nameifany is None:
         return f"{name} account doesn't exist!"
+    if 'user' not in session:
+        return redirect('/login')
+    if name == session['user'][0]:
+        return redirect('/profile')
+    img = RAdb['posts'].find({'by': name})
+    data = []
+    total = 0
+    for image in img:
+        total+=1
+        data.append({"ID": image['_id'], "link": image['url'], "text": image['text'], "date": image['date'], "time": image['time']})
+    # print(data)
+    pfp = storage.child(f"users/{name}/Info/ProfilePic.png").get_url(None)
+    name = accounts.find_one({'_id': name})
+    return render_template('profiles.html', images = data, user = name['name'], total=total, pic=pfp)
     # return "e"
 @app.route('/post/<string:postID>')
 def post(postID):
@@ -228,22 +219,21 @@ def post(postID):
 @app.route('/comment/<string:ID>/')
 @limiter.limit("5 per minute")
 def commemnt(ID):
-    if 'user' in session:
-        text = request.args.get('text')
-        data = {'by': session['user'][2], 'text': text, 'id': session['user'][0]}
-        try:
-            comments = RAdb['posts'].find_one({'_id': ID})
-            if comments is not None:
-                comments = comments['comments']
-                comments.append(data)
-                RAdb['posts'].update_one({'_id': ID}, {'$set': {'comments': comments}})
-                return "Commented!"
-            else:
-                return "that ID doesn't exist!"
-        except:
-            return "Failed!"
-    else:
+    if 'user' not in session:
         return redirect('/login')
+    text = request.args.get('text')
+    data = {'by': session['user'][2], 'text': text, 'id': session['user'][0]}
+    try:
+        comments = RAdb['posts'].find_one({'_id': ID})
+        if comments is not None:
+            comments = comments['comments']
+            comments.append(data)
+            RAdb['posts'].update_one({'_id': ID}, {'$set': {'comments': comments}})
+            return "Commented!"
+        else:
+            return "that ID doesn't exist!"
+    except:
+        return "Failed!"
     
 @app.route('/TOS')
 def tos():
